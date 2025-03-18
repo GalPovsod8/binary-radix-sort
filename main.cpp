@@ -22,6 +22,11 @@ void countingSort(vector<unsigned char> &arr, int bit) {
     arr = output;
 }
 
+void binaryRadixSort(vector<unsigned char> &arr) {
+    for (int bit = 0; bit < 8; bit++)
+        countingSort(arr, bit);
+}
+
 vector<unsigned char> readInputFile(const string &filename) {
     ifstream file(filename);
     vector<unsigned char> numbers;
