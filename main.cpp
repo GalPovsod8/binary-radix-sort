@@ -64,6 +64,9 @@ int main(int argc, char *argv[]) {
     string outputFile = "out.txt";
 
     vector<unsigned char> numbers = readInputFile(inputFile);
+    binaryRadixSort(numbers);
+    writeOutputFile(outputFile, numbers);
+    
     
     return 0;
 }
