@@ -5,6 +5,13 @@
 
 using namespace std;
 
+void countingSort(vector<unsigned char> &arr, int bit) {
+    vector<unsigned char> output(arr.size());
+    vector<int> count(2, 0);
+    
+    
+}
+
 vector<unsigned char> readInputFile(const string &filename) {
     ifstream file(filename);
     vector<unsigned char> numbers;
