@@ -1,0 +1,28 @@
+name: Test Binary Radix Sort
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  check_tests:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          if [ ! -f "test_input.txt" ] || [ ! -f "expected_output.txt" ]; then
+            echo "Manjkajo testne datoteke!" > napaka.txt
+            exit 1
+          fi
+
+  run_tests:
+    needs: check_tests
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        test_case: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo apt-get update && sudo apt-get install -y g++ make
+      - run: make
+      - run: ./run_tests.sh ${{ matrix.test_case }}
