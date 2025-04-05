@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
-          if [ ! -f "input.txt" ] || [ ! -f "output.txt" ]; then
+          if [ ! -f "input.txt" ] || [ ! -f "out.txt" ]; then
             echo "Manjkajo testne datoteke!" > napaka.txt
             exit 1
           fi
