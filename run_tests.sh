@@ -5,5 +5,5 @@ case $1 in
   3) echo "10 20 10" > input.txt && echo "10 10 20" > out.txt ;;
 esac
 
-./main input.txt
+./dn1 input.txt
 diff -q out.txt out.txt || exit 1
