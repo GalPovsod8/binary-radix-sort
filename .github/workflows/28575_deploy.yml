@@ -1,5 +1,9 @@
 name: Deploy to Docker Hub
 
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  REPONAME: ${{ secrets.REPO_NAME }}
 on:
   workflow_run:
     workflows: ["Test Binary Radix Sort"]
@@ -15,3 +19,13 @@ jobs:
       - run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/binary-radix-sort:latest .
       - run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
       - run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/binary-radix-sort:latest
+
+      - name: Potisni na docker hub z akcijo
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+          registry: docker.io
+          dockerfile: Dockerfile
+          tags: $date
+          image: ${{env.DOCKER_USERNAME}}/${{ env.REPONAME }}
