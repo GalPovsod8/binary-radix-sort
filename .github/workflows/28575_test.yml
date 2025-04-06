@@ -24,4 +24,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: make
-      - run: sudo ./run_tests.sh
+      - run: ./run_tests.sh
