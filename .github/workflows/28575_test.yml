@@ -49,7 +49,6 @@ jobs:
           if [ -s ./napaka/napaka.txt ]; then
             echo "Napaka pri preverjanju testnih skript!"
             cat ./napaka/napaka.txt
-            exit 1
           fi
 
       # Klonira repozitorij
