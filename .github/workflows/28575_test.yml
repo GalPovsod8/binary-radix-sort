@@ -27,7 +27,7 @@ jobs:
       # Shranimo napaka.txt kot artefakt, da ga drugi job lahko prenese
       - name: Naloži napaka.txt kot artefakt
         if: always()  # Vedno naloži artefakt, tudi če test pade
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: napaka  # Ime artefakta
           path: napaka.txt  # Pot do datoteke
