@@ -1,42 +1,62 @@
-# Ime workflowa, ki izvaja testiranje binarne implementacije radix sorta
+# Ime workflowa za testiranje kode
 name: Test Binary Radix Sort
 
-# Kdaj se workflow sproži: ob vsakem potisku (push) na vejo 'main'
+# Proženje ob potisku na vejo 'main'
 on:
   push:
     branches: [ main ]
 
 jobs:
-  # Prvi job: preveri, ali obstajajo testne datoteke (npr. input.txt)
+  # Prvi posel: preveri, ali obstajajo testne skripte
   check_tests:
-    runs-on: self-hosted  # Teče na lokalnem (self-hosted) runnerju
+    runs-on: self-hosted  # Lokalni runner
     steps:
-      # Klonira repozitorij v delovni imenik
+      # Klonira repozitorij
       - uses: actions/checkout@v3
 
-      # Preveri, če obstaja datoteka input.txt, sicer zapiše napako in prekine job
+      # Preveri, če obstaja testna skripta
       - run: |
-          if [ ! -f "input.txt" ]; then
-            echo "Manjkajo testne datoteke!" > napaka.txt  # Zapiši napako v napaka.txt
-            exit 1  # Prekini job z neuspehom
+          if [ ! -f "run_tests.sh" ]; then
+            echo "Manjkajo testne skripte!" > napaka.txt
+            exit 1
           fi
+      # Ustvari artefakt z napako (če obstaja)
+      - name: Shranjevanje napake
+        uses: actions/upload-artifact@v3
+        with:
+          name: napaka
+          path: napaka.txt
 
-  # Drugi job: izvaja teste, če je prvi uspešen
+  # Drugi posel: pripravi okolje in izvede teste
   run_tests:
-    needs: check_tests  # Ta job se izvede šele, ko check_tests uspešno zaključi
-    runs-on: self-hosted  # Tudi ta job teče na lokalnem runnerju
-
-    # Uporabljamo matriko za izvajanje več različnih primerov testov
+    needs: check_tests  # Odvisen od prvega posla
+    runs-on: self-hosted
+    
     strategy:
       matrix:
-        test_case: [1, 2, 3]  # Trije primeri testov, vrednosti matrike se lahko uporabijo kot spremenljivke
+        test_case: [1, 2, 3]  # Različni testni primeri
 
     steps:
-      # Ponovno kloniraj repozitorij
+      # Prenos artefakta iz prvega posla
+      - name: Prenos napake
+        uses: actions/download-artifact@v3
+        with:
+          name: napaka
+          path: ./napaka
+
+      # Preveri, če je napaka prisotna
+      - run: |
+          if [ -s ./napaka/napaka.txt ]; then
+            echo "Napaka pri preverjanju testnih skript!"
+            cat ./napaka/napaka.txt
+            exit 1
+          fi
+
+      # Klonira repozitorij
       - uses: actions/checkout@v3
 
-      # Prevedi program (predpostavljamo, da Makefile obstaja)
+      # Prevede program
       - run: make
 
-      # Zaženi testni skript
-      - run: ./run_tests.sh
+      # Izvede teste z matriko
+      - run: ./run_tests.sh ${{ matrix.test_case }}
