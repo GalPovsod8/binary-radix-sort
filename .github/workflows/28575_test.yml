@@ -1,27 +1,42 @@
+# Ime workflowa, ki izvaja testiranje binarne implementacije radix sorta
 name: Test Binary Radix Sort
 
+# Kdaj se workflow sproži: ob vsakem potisku (push) na vejo 'main'
 on:
   push:
     branches: [ main ]
 
 jobs:
+  # Prvi job: preveri, ali obstajajo testne datoteke (npr. input.txt)
   check_tests:
-    runs-on: self-hosted
+    runs-on: self-hosted  # Teče na lokalnem (self-hosted) runnerju
     steps:
+      # Klonira repozitorij v delovni imenik
       - uses: actions/checkout@v3
+
+      # Preveri, če obstaja datoteka input.txt, sicer zapiše napako in prekine job
       - run: |
           if [ ! -f "input.txt" ]; then
-            echo "Manjkajo testne datoteke!" > napaka.txt
-            exit 1
+            echo "Manjkajo testne datoteke!" > napaka.txt  # Zapiši napako v napaka.txt
+            exit 1  # Prekini job z neuspehom
           fi
 
+  # Drugi job: izvaja teste, če je prvi uspešen
   run_tests:
-    needs: check_tests
-    runs-on: self-hosted
+    needs: check_tests  # Ta job se izvede šele, ko check_tests uspešno zaključi
+    runs-on: self-hosted  # Tudi ta job teče na lokalnem runnerju
+
+    # Uporabljamo matriko za izvajanje več različnih primerov testov
     strategy:
       matrix:
-        test_case: [1, 2, 3]
+        test_case: [1, 2, 3]  # Trije primeri testov, vrednosti matrike se lahko uporabijo kot spremenljivke
+
     steps:
+      # Ponovno kloniraj repozitorij
       - uses: actions/checkout@v3
+
+      # Prevedi program (predpostavljamo, da Makefile obstaja)
       - run: make
+
+      # Zaženi testni skript
       - run: ./run_tests.sh
