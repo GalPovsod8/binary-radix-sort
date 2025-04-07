@@ -17,9 +17,9 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      - run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/binary-radix-sort:latest .
-      - run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-      - run: sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/binary-radix-sort:latest
+      # - run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/binary-radix-sort:latest .
+      # - run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      # - run: sudo docker push ${{ secrets.DOCKERHUB_USERNAME }}/binary-radix-sort:latest
 
       - name: Potisni na docker hub z akcijo
         uses: mr-smithers-excellent/docker-build-push@v6
