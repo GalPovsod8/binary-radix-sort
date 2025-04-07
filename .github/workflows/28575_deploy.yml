@@ -1,33 +1,44 @@
+# Ime CI/CD workflowa, ki bo skrbel za objavo Docker slike na Docker Hub
 name: Deploy to Docker Hub
 
+# Definicija globalnih spremenljivk okolja (env)
 env:
-  DOCKER_USERNAME: galpovsod
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  REPONAME: ${{ secrets.REPO_NAME }}
+  DOCKER_USERNAME: galpovsod  # Uporabniško ime na Docker Hub
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  # Geslo (vnešeno kot GitHub Secret)
+  REPONAME: ${{ secrets.REPO_NAME }}  # Ime Docker repozitorija (GitHub Secret)
 
+# Kdaj se ta workflow sproži
 on:
   workflow_run:
-    workflows: ["Test Binary Radix Sort"]
-    branches: [ main ]
-    types: [ completed ]
+    workflows: ["Test Binary Radix Sort"]  # Sproži se po zaključenem workflowu s tem imenom
+    branches: [ main ]  # Samo če se zgodi na veji 'main'
+    types: [ completed ]  # Ko se prejšnji workflow zaključi (ne glede na rezultat)
 
 jobs:
   deploy:
+    # Pogoj: Job se izvede samo, če je zaključek prejšnjega workflowa bil 'success'
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    # Job se izvaja na lokalno nameščenem (self-hosted) runnerju
     runs-on: self-hosted
+
     steps:
+      # Klonira trenutno stanje repozitorija v delovni imenik
       - uses: actions/checkout@v3
-      
+
+      # Nastavi Docker Buildx, ki omogoča napredno gradnjo (npr. za več arhitektur)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      # Prijava v Docker Hub prek ukazne vrstice z uporabo varno podanega gesla
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ env.DOCKER_USERNAME }}" --password-stdin
 
+      # Zgradi in potisne (push) Docker sliko na Docker Hub
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ env.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest
+          context: .  # Mapa iz katere naj Docker gradi (trenutna mapa)
+          file: ./Dockerfile  # Pot do Dockerfile-a
+          push: true  # Označi, da naj sliko potisne na Docker Hub
+          tags: ${{ env.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest  # Označi sliko s 'latest' tagom
