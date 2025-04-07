@@ -7,4 +7,9 @@ case $1 in
 esac
 
 ./dn1 input.txt
+
+# Ensure newline at end of files
+sed -i -e '$a\' out.txt
+sed -i -e '$a\' expected.txt
+
 diff out.txt expected.txt
