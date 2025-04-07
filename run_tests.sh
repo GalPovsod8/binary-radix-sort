@@ -8,4 +8,3 @@ esac
 
 ./dn1 input.txt
 diff -q out.txt expected.txt || exit 1
-  *) echo "Neveljaven test case!" && exit 1 ;;
