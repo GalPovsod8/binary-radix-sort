@@ -7,4 +7,4 @@ case $1 in
 esac
 
 ./dn1 input.txt
-diff -q out.txt expected.txt
+diff out.txt expected.txt
