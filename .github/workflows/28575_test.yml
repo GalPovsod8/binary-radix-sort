@@ -1,69 +1,42 @@
-# Ime CI workflowa
+# Ime workflowa, ki izvaja testiranje binarne implementacije radix sorta
 name: Test Binary Radix Sort
 
-# Ta workflow se zažene ob vsakem pushu na glavno (main) vejo
+# Kdaj se workflow sproži: ob vsakem potisku (push) na vejo 'main'
 on:
   push:
     branches: [ main ]
 
 jobs:
-  # === Prvi job: Preverjanje testnih datotek ===
+  # Prvi job: preveri, ali obstajajo testne datoteke (npr. input.txt)
   check_tests:
-    runs-on: self-hosted  # Uporabimo svoj lokalni runner
+    runs-on: self-hosted  # Teče na lokalnem (self-hosted) runnerju
     steps:
-      # Kloniramo kodo iz repozitorija
+      # Klonira repozitorij v delovni imenik
       - uses: actions/checkout@v3
 
-      # Preverimo, če obstajajo testne datoteke (npr. input.txt)
-      - name: Preveri testne datoteke
-        run: |
+      # Preveri, če obstaja datoteka input.txt, sicer zapiše napako in prekine job
+      - run: |
           if [ ! -f "input.txt" ]; then
-            echo "Manjkajo testne datoteke!" > napaka.txt
-            exit 1  # Zaključi z napako, če datoteke ni
-          else
-            echo "Vse testne datoteke so prisotne." > napaka.txt
+            echo "Manjkajo testne datoteke!" > napaka.txt  # Zapiši napako v napaka.txt
+            exit 1  # Prekini job z neuspehom
           fi
 
-      # Shranimo napaka.txt kot artefakt, da ga drugi job lahko prenese
-      - name: Naloži napaka.txt kot artefakt
-        if: always()  # Vedno naloži artefakt, tudi če test pade
-        uses: actions/upload-artifact@v4
-        with:
-          name: napaka  # Ime artefakta
-          path: napaka.txt  # Pot do datoteke
-
-  # === Drugi job: Poženemo teste ===
+  # Drugi job: izvaja teste, če je prvi uspešen
   run_tests:
-    needs: check_tests  # Začne se šele, ko se check_tests zaključi
-    runs-on: self-hosted
+    needs: check_tests  # Ta job se izvede šele, ko check_tests uspešno zaključi
+    runs-on: self-hosted  # Tudi ta job teče na lokalnem runnerju
 
-    # Uporabimo matriko, da teste poženemo za več različnih primerov
+    # Uporabljamo matriko za izvajanje več različnih primerov testov
     strategy:
       matrix:
-        test_case: [1, 2, 3]  # Trije različni testni primeri
+        test_case: [1, 2, 3]  # Trije primeri testov, vrednosti matrike se lahko uporabijo kot spremenljivke
 
     steps:
-      # Kloniramo kodo iz repozitorija
+      # Ponovno kloniraj repozitorij
       - uses: actions/checkout@v3
 
-      # Prenesemo napaka.txt artefakt iz prvega joba
-      - name: Prenesi napaka.txt artefakt
-        uses: actions/download-artifact@v4
-        with:
-          name: napaka
+      # Prevedi program (predpostavljamo, da Makefile obstaja)
+      - run: make
 
-      # Preverimo, če je v napaka.txt zapisano, da testne datoteke manjkajo
-      - name: Preveri vsebino napaka.txt
-        run: |
-          if grep -q "Manjkajo testne datoteke" napaka.txt; then
-            echo "Napaka: testne datoteke manjkajo. Testiranje se ne bo izvedlo."
-            exit 1  # Zaključi z napako in preskoči nadaljnje korake
-          fi
-
-      # Prevedemo program (npr. z uporabo Makefile)
-      - name: Prevedi program
-        run: make
-
-      # Poženemo testno skripto z argumentom matrike
-      - name: Poženi testno skripto
-        run: ./run_tests.sh ${{ matrix.test_case }}
+      # Zaženi testni skript
+      - run: ./run_tests.sh
